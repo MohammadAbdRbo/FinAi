@@ -100,7 +100,7 @@ function Dashboard() {
             ? budgetList.map((budget, index) => (
                 <BudgetItem budget={budget} key={index} />
               ))
-            : [1, 2, 3, 4].map((item, index) => (
+            : [1, 2, 3, 4, 5, 6, 7].map((item, index) => (
                 <div
                   className="h-[180xp] w-full
                  bg-slate-200 rounded-lg animate-pulse"

@@ -9,5 +9,4 @@ function Budget() {
     </div>
   )
 }
-
-export default Budget
+ export default Budget

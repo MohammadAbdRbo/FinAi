@@ -25,7 +25,7 @@ function IncomeItem({ budget }) {
             
           </div>
         </div>
-        <h2 className="font-bold text-primary text-lg"> ${budget.amount}</h2>
+        <h2 className="font-bold text-primary text-lg"> ₪{budget.amount}</h2>
       </div>
     </div>
   );

@@ -91,7 +91,7 @@ function CreateIncomes({ refreshData }) {
                   <h2 className="text-black font-medium my-1">Montly Amount</h2>
                   <Input
                     type="number"
-                    placeholder="e.g. 5000$"
+                    placeholder="e.g. 5000₪"
                     onChange={(e) => setAmount(e.target.value)}
                   />
                 </div>
