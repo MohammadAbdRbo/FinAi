@@ -51,12 +51,7 @@ function SideNav() {
       icon: TrendingDownIcon,
       path: "/dashboard/debts",
     },
-    {
-      id: 7,
-      name: "Ai Advisor",
-      icon: Bot,
-      path: "/dashboard/aiadvisor",
-    },
+    
     
   ];
   const path = usePathname();

@@ -1,7 +1,6 @@
 import formatNumber from "@/utils";
 import getFinancialAdvice from "@/utils/getFinancialAdvice";
-import AdvisorPage from "../aiadvisor/_components/AdvisorPage";
-import { calculateBudgetTotals } from "@/utils/budgetUtils";
+//import AdvisorPage from "../aiadvisor/_components/AdvisorPage";
 import {
   PiggyBank,
   ReceiptText,
@@ -11,7 +10,7 @@ import {
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
-function CardInfo({ budgetList, incomeList }) {
+function CardInfo({ budgetList, incomeList,onTotalsCalculated }) {
   const [totalBudget, setTotalBudget] = useState(0);
   const [totalSpend, setTotalSpend] = useState(0);
   const [totalIncome, setTotalIncome] = useState(0);
@@ -19,20 +18,9 @@ function CardInfo({ budgetList, incomeList }) {
 
   useEffect(() => {
     if (budgetList.length > 0 || incomeList.length > 0) {
-      calculateBudgetTotals();
+      CalculateCardInfo();
     }
   }, [budgetList, incomeList]);
-
-  
-
-  useEffect(() => {
-    if (budgetList.length > 0 || incomeList.length > 0) {
-      const { totalBudget, totalSpend, totalIncome } = calculateBudgetTotals(budgetList, incomeList);
-      setTotalBudget(totalBudget);
-      setTotalSpend(totalSpend);
-      setTotalIncome(totalIncome);
-    }
-}, [budgetList, incomeList]);
 
   useEffect(() => {
     if (totalBudget > 0 || totalIncome > 0 || totalSpend > 0) {
@@ -49,7 +37,33 @@ function CardInfo({ budgetList, incomeList }) {
     }
   }, [totalBudget, totalIncome, totalSpend]);
 
+  const CalculateCardInfo = () => {
+    let totalBudget_ = 0;
+    let totalSpend_ = 0;
+    let totalIncome_ = 0;
   
+    budgetList.forEach((element) => {
+      totalBudget_ += Number(element.amount);
+      totalSpend_ += element.totalSpend;
+    });
+  
+    incomeList.forEach((element) => {
+      totalIncome_ += element.totalAmount;
+    });
+  
+    setTotalIncome(totalIncome_);
+    setTotalBudget(totalBudget_);
+    setTotalSpend(totalSpend_);
+  
+    // Send the totals to Dashboard
+    if (onTotalsCalculated) {
+      onTotalsCalculated({
+        totalBudget: totalBudget_,
+        totalSpend: totalSpend_,
+        totalIncome: totalIncome_,
+      });
+    }
+  };
   
   
   return (
@@ -76,11 +90,6 @@ function CardInfo({ budgetList, incomeList }) {
               </h2>
             </div>
           </div>
-          <AdvisorPage
-            totalBudget={totalBudget}
-            totalSpend={totalSpend}
-            totalIncome={totalIncome}
-          />
           <div className="mt-7 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             <div className="p-7 border rounded-2xl flex items-center justify-between">
               <div>
@@ -117,6 +126,7 @@ function CardInfo({ budgetList, incomeList }) {
               <CircleDollarSign className="bg-blue-800 p-3 h-12 w-12 rounded-full text-white" />
             </div>
           </div>
+          
         </div>
       ) : (
         <div className="mt-7 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">

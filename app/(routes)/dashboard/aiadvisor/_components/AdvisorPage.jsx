@@ -2,28 +2,32 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
-import { calculateBudgetTotals } from "@/utils/budgetUtils";
 
-function AdvisorPage({ budgetList, incomeList }) {
-  const [totalBudget, setTotalBudget] = useState(0);
-  const [totalSpend, setTotalSpend] = useState(0);
-  const [totalIncome, setTotalIncome] = useState(0);
-
+// function AdvisorPage({ budgetList, incomeList }) {
+  function AdvisorPage({ totalBudget, totalIncome, totalSpend }) {
+  // const [totalBudget, setTotalBudget] = useState(0);
+  // const [totalSpend, setTotalSpend] = useState(0);
+  // const [totalIncome, setTotalIncome] = useState(0);
   const [messages, setMessages] = useState([
     { text: "Hey there! How can I assist you today?", sender: "bot" },
   ]);
   const [input, setInput] = useState("");
   const messagesEndRef = useRef(null);
+  // const [messages, setMessages] = useState([
+  //   { text: "Hey there! How can I assist you today?", sender: "bot" },
+  // ]);
+  // const [input, setInput] = useState("");
+  // const messagesEndRef = useRef(null);
 
   // احسب المجموعات لما تتغير البيانات
-  useEffect(() => {
-    if (budgetList?.length > 0 || incomeList?.length > 0) {
-      const totals = calculateBudgetTotals(budgetList, incomeList);
-      setTotalBudget(totals.totalBudget);
-      setTotalSpend(totals.totalSpend);
-      setTotalIncome(totals.totalIncome);
-    }
-  }, [budgetList, incomeList]);
+  // useEffect(() => {
+  //   if (budgetList?.length > 0 || incomeList?.length > 0) {
+  //     const totals = calculateBudgetTotals(budgetList, incomeList);
+  //     setTotalBudget(totals.totalBudget);
+  //     setTotalSpend(totals.totalSpend);
+  //     setTotalIncome(totals.totalIncome);
+  //   }
+  // }, [budgetList, incomeList]);
 
   // إرسال الرسالة
   const sendMessage = async () => {
@@ -66,8 +70,8 @@ function AdvisorPage({ budgetList, incomeList }) {
   }, [messages]);
 
   return (
-    <div className="flex flex-col h-screen bg-gray-100">
-      <div className="bg-blue-600 text-white p-4 text-lg font-bold shadow">
+    <div className="flex flex-col h-screen bg-gray-100 border rounded-2xl p-5">
+      <div className=" text-black p-4 text-lg font-bold ">
         AI Chat Support
       </div>
 
@@ -90,7 +94,7 @@ function AdvisorPage({ budgetList, incomeList }) {
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="p-4 bg-white border-t flex justify-between">
+      <div className="p-4   flex justify-between">
         <input
           type="text"
           value={input}
