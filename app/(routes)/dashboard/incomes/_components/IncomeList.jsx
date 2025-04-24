@@ -6,7 +6,7 @@ import { desc, eq, getTableColumns, sql } from "drizzle-orm";
 import { Incomes, Expenses } from "@/utils/schema";
 import { useUser } from "@clerk/nextjs";
 import IncomeItem from "./IncomeItem";
-import Link from "next/link";
+
 
 function IncomeList() {
   const [incomelist, setIncomelist] = useState([]);
@@ -39,9 +39,9 @@ function IncomeList() {
         <CreateIncomes refreshData={() => getIncomelist()} />
         {incomelist?.length > 0
   ? incomelist.map((budget, index) => (
-      <Link href={`/incomes/${budget.id}`} key={index}>
+      
         <IncomeItem budget={budget} />
-      </Link>
+      
     ))
   : [1, 2, 3, 4, 5].map((item, index) => (
       <div

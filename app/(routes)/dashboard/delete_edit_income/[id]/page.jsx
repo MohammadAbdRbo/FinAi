@@ -2,11 +2,10 @@
 import { db } from "@/utils/dbConfig";
 import { Incomes } from "@/utils/schema";
 import { useUser } from "@clerk/nextjs";
-import { eq, getTableColumns } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import React, { useEffect, useState } from "react";
-import IncomeItem from "../IncomeItem";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Trash } from "lucide-react";
+import { ArrowLeft, Pen, Trash } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,11 +19,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import EditIncome from "../EditIncome";
+import EditIncome from "../_components/EditIncome";
+import IncomeItem from "../../incomes/_components/IncomeItem";
 
-function IncomeScreen({ params }) {
+function IncomesScreen({ params }) {
   const { user } = useUser();
-  const [IncomeInfo, setIncomeInfo] = useState();
+  const [budget, setBudget] = useState();
   const router = useRouter();
 
   useEffect(() => {
@@ -32,18 +32,33 @@ function IncomeScreen({ params }) {
   }, [user]);
 
   const getIncomeInfo = async () => {
+    if (!params?.id || isNaN(Number(params.id))) {
+      console.error("Invalid or missing ID");
+      return;
+    }
+
     const result = await db
-      .select(getTableColumns(Incomes))
+      .select()
       .from(Incomes)
-      .where(eq(Incomes.createdBy, user?.primaryEmailAddress?.emailAddress))
-      .where(eq(Incomes.id, params.id));
-    setIncomeInfo(result[0]);
+      .where(eq(Incomes.id, Number(params.id)))
+      .then((res) => res[0]);
+
+    setBudget(result);
   };
 
   const deleteIncome = async () => {
-    await db.delete(Incomes).where(eq(Incomes.id, params.id));
+    if (!params?.id || isNaN(Number(params.id))) {
+      console.error("Invalid or missing ID for deletion");
+      return;
+    }
+
+    await db
+      .delete(Incomes)
+      .where(eq(Incomes.id, Number(params.id)))
+      .returning();
+
     toast("Income Deleted!");
-    router.replace("/dashboard/Incomes");
+    router.replace("/dashboard/incomes");
   };
 
   return (
@@ -54,10 +69,17 @@ function IncomeScreen({ params }) {
           My Income
         </span>
         <div className="flex gap-2 items-center">
-          <EditIncome
-            IncomeInfo={IncomeInfo}
-            refreshData={() => getIncomeInfo()}
-          />
+          {budget && (
+            <EditIncome
+              incomeInfo={budget}
+              refreshData={getIncomeInfo}
+              trigger={
+                <Button className="rounded-full px-3 flex gap-2 items-center">
+                  <Pen className="w-4" /> Edit
+                </Button>
+              }
+            />
+          )}
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button className="flex gap-2 rounded-full" variant="destructive">
@@ -68,7 +90,7 @@ function IncomeScreen({ params }) {
               <AlertDialogHeader>
                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will delete your current Income and remove your data.
+                  This action cannot be undone. This will permanently delete this income record from our database.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -83,14 +105,14 @@ function IncomeScreen({ params }) {
       </h2>
 
       <div className="mt-6">
-        {IncomeInfo ? (
-          <IncomeItem budget={IncomeInfo} />
+        {budget ? (
+          <IncomeItem budget={budget} />
         ) : (
-          <div className="h-[150px] w-full bg-slate-200 rounded-lg animate-pulse" />
+          <div className="h-[150px] w-full bg-slate-200 rounded-lg animate-pulse"></div>
         )}
       </div>
     </div>
   );
 }
 
-export default IncomeScreen;
+export default IncomesScreen;
