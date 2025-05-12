@@ -1,13 +1,19 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import DebtTable from "./_components/DebtTable";
-import EditDebtModal from "./_components/EditDebtModal";
+import React, { useState, useEffect } from 'react';
+import { db } from '@/utils/dbConfig';
+import { Debts } from '@/utils/schema';
+import { useUser } from '@clerk/nextjs';
+import DebtList from './_components/DebtList';
+import CreateDebt from './_components/CreateDebt';
+import { Button } from '@/components/ui/button';
+import { eq, desc } from 'drizzle-orm';
 
-function DebtsPage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+export default function DebtsPage() {
+  const { user } = useUser();
   const [debts, setDebts] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editId, setEditId] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     amount: '',
@@ -16,18 +22,121 @@ function DebtsPage() {
     note: '',
     status: 'Unpaid',
   });
-  useEffect(() => {
-    const fetchDebts = async () => {
-      const res = await fetch('/api/debts/all');
-      const data = await res.json();
-      setDebts(data);
-    };
-    fetchDebts();
-  }, []);
-  
-  const [editId, setEditId] = useState(null);
+  // Add a refreshKey state to force re-renders
+  const [refreshKey, setRefreshKey] = useState(0);
 
+  // Fetch debts from the database
+  const fetchDebts = async () => {
+    if (!user?.emailAddresses?.[0]?.emailAddress) return;
+    try {
+      const userEmail = user.emailAddresses[0].emailAddress;
+      const result = await db
+        .select()
+        .from(Debts)
+        .where(eq(Debts.userEmail, userEmail))
+        .orderBy(desc(Debts.createdAt));
+      setDebts(result);
+    } catch (error) {
+      console.error("Error fetching debts:", error);
+    }
+  };
+
+  // Handle editing a debt
+  const handleEdit = (debt) => {
+    setFormData({
+      ...debt,
+      // Format date for input if it exists
+      dueDate: debt.dueDate ? new Date(debt.dueDate).toISOString().split('T')[0] : '',
+    });
+    setEditId(debt.id);
+    setIsModalOpen(true);
+  };
+
+  // Handle deleting a debt
+  const handleDelete = async (id) => {
+    if (!id) return;
+    try {
+      await db.delete(Debts).where(eq(Debts.id, id));
+      // Force refresh
+      setRefreshKey(prevKey => prevKey + 1);
+      await fetchDebts();
+    } catch (error) {
+      console.error("Error deleting debt:", error);
+    }
+  };
+
+  // Handle toggling paid status
+  const handleTogglePaid = async (id, currentStatus) => {
+    if (!id) return;
+    try {
+      const newStatus = currentStatus === 'Paid' ? 'Unpaid' : 'Paid';
+      await db.update(Debts)
+        .set({ status: newStatus })
+        .where(eq(Debts.id, id));
+      // Force refresh
+      setRefreshKey(prevKey => prevKey + 1);
+      await fetchDebts();
+    } catch (error) {
+      console.error("Error updating status:", error);
+    }
+  };
+
+  // Handle submitting the form (either add or edit)
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    const userEmail = user?.emailAddresses?.[0]?.emailAddress;
+    if (!userEmail) return;
+    
+    try {
+      if (editId !== null) {
+        // Update existing debt
+        await db.update(Debts).set({
+          name: formData.name,
+          amount: parseFloat(formData.amount),
+          debtType: formData.debtType,
+          dueDate: formData.dueDate ? new Date(formData.dueDate) : null,
+          note: formData.note,
+          status: formData.status
+        }).where(eq(Debts.id, editId));
+      } else {
+        // Create new debt - remove ID generation and let the database handle it
+        await db.insert(Debts).values({
+          userEmail,
+          name: formData.name,
+          amount: parseFloat(formData.amount),
+          debtType: formData.debtType,
+          dueDate: formData.dueDate ? new Date(formData.dueDate) : null,
+          note: formData.note,
+          status: formData.status,
+          createdAt: new Date()
+        });
+      }
+      
+      // Reset form and close modal
+      setIsModalOpen(false);
+      setFormData({
+        name: '',
+        amount: '',
+        debtType: 'owedToYou',
+        dueDate: '',
+        note: '',
+        status: 'Unpaid',
+      });
+      setEditId(null);
+      
+      // Force refresh and fetch debts
+      setRefreshKey(prevKey => prevKey + 1);
+      await fetchDebts();
+    } catch (error) {
+      console.error("Error saving debt:", error);
+    }
+  };
+
+  // Open the modal for creating a new debt
   const handleOpenModal = () => setIsModalOpen(true);
+
+  // Close the modal
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setFormData({
@@ -41,88 +150,33 @@ function DebtsPage() {
     setEditId(null);
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await fetch('/api/debts', {
-        method: editId ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, id: editId }),
-      });
-  
-      if (!res.ok) throw new Error('Failed to save debt');
-  
-      const saved = await res.json();
-      if (editId !== null) {
-        setDebts(prev => prev.map((d) => d.id === saved.id ? saved : d));
-      } else {
-        setDebts(prev => [...prev, saved]);
-      }
-  
-      handleCloseModal();
-    } catch (err) {
-      console.error(err);
-      alert('Error saving debt');
+  useEffect(() => {
+    if (user) {
+      fetchDebts();
     }
-  };
-  
-  const handleEdit = (debt) => {
-    setFormData({
-      name: debt.name,
-      amount: debt.amount,
-      debtType: debt.debtType,
-      dueDate: debt.dueDate,
-      note: debt.note,
-      status: debt.status,
-    });
-    setEditId(debt.id);
-    setIsModalOpen(true);
-  };
-
-  const handleDelete = async (id) => {
-    await fetch('/api/debts', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id }),
-    });
-    setDebts(prev => prev.filter(d => d.id !== id));
-  };
-  
-
-  const handleTogglePaid = async (id) => {
-    const debt = debts.find(d => d.id === id);
-    const updatedStatus = debt.status === 'Paid' ? 'Unpaid' : 'Paid';
-  
-    const res = await fetch('/api/debts', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...debt, status: updatedStatus }),
-    });
-  
-    const updated = await res.json();
-    setDebts(prev => prev.map(d => d.id === id ? updated : d));
-  };
-  
+  }, [user, refreshKey]); // Add refreshKey to dependencies
 
   return (
     <div className="p-8">
       <h1 className="text-3xl font-bold mb-6 text-center">Debt Tracking</h1>
-
       <div className="flex justify-end mb-4">
-        <Button onClick={handleOpenModal} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow">
-          Add New Debt
-        </Button>
+        <Button onClick={handleOpenModal}>Add New Debt</Button>
       </div>
-
-      <DebtTable debts={debts} handleEdit={handleEdit} handleDelete={handleDelete} handleTogglePaid={handleTogglePaid} />
-      <EditDebtModal isModalOpen={isModalOpen} handleCloseModal={handleCloseModal} formData={formData} handleChange={handleChange} handleSubmit={handleSubmit} editId={editId} />
+      <DebtList 
+        debts={debts} 
+        onEdit={handleEdit} 
+        onDelete={handleDelete}
+        onTogglePaid={handleTogglePaid}
+      />
+      {isModalOpen && (
+        <CreateDebt
+          formData={formData}
+          onChange={setFormData}
+          onSubmit={handleSubmit}
+          onClose={handleCloseModal}
+          editId={editId}
+        />
+      )}
     </div>
   );
 }
-
-export default DebtsPage;

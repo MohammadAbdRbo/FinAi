@@ -42,3 +42,17 @@ export const Debts = pgTable("debts", {
   status: varchar("status", { length: 50 }).default("Unpaid"),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+export const Investments = pgTable('investments', {
+  id: serial('id').primaryKey(),
+  userEmail: varchar('user_email', { length: 255 }).notNull(),
+  name: varchar('name', { length: 255 }).notNull(),
+  ticker: varchar('ticker', { length: 50 }),
+  assetType: varchar('asset_type', { length: 50 }).notNull(),
+  purchaseDate: date('purchase_date'),
+  purchasePrice: numeric('purchase_price').notNull(),
+  quantity: numeric('quantity').notNull(),
+  currentPrice: numeric('current_price').notNull(),
+  notes: varchar('notes', { length: 1000 }),
+  createdAt: timestamp('created_at').defaultNow().notNull()
+});
