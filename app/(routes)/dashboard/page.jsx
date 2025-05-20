@@ -74,13 +74,16 @@ function Dashboard() {
     setExpensesList(result);
   };
 
-  return (
-    <div className="p-8">
-      <h2 className="font-bold text-4xl">Hi, {user?.fullName} 👋</h2>
-      <p className="text-gray-500">
-        Here's what happenning with your money, Lets Manage your expense
-      </p>
+ return (
+  <div className="p-4 md:p-6 lg:p-8 bg-gray-50">
+    {/* Header Section with greeting and subtitle */}
+    <div className="mb-6">
+      <h2 className="font-bold text-3xl md:text-4xl text-gray-800">Hi, {user?.fullName} 👋</h2>
+      <p className="text-gray-500 mt-1">Here's what's happening with your money. Let's manage your expenses.</p>
+    </div>
 
+    {/* Main Summary Cards */}
+    <div className="mb-8">
       <CardInfo
         budgetList={budgetList}
         incomeList={incomeList}
@@ -90,29 +93,39 @@ function Dashboard() {
           setTotalIncome(totalIncome);
         }}
       />
+    </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 mt-6 gap-5">
-        <div className="lg:col-span-2">
+    {/* Main Content Grid */}
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Left Column - Charts and Tables */}
+      <div className="lg:col-span-2 space-y-6">
+        {/* Bar Chart */}
+        <div className="bg-white rounded-xl shadow-sm p-4">
           <BarChartDashboard budgetList={budgetList} />
-          <div className="mt-5">
-            <AdvisorPage
-              totalBudget={totalBudget}
-              totalSpend={totalSpend}
-              totalIncome={totalIncome}
+        </div>
+        
+        {/* Financial Advisor Section */}
+        <div className="bg-white rounded-xl shadow-sm p-4">
+          <AdvisorPage
+            totalBudget={totalBudget}
+            totalSpend={totalSpend}
+            totalIncome={totalIncome}
           />
-          </div>
-          
-
+        </div>
+        
+        {/* Expenses Table */}
+        <div className="bg-white rounded-xl shadow-sm p-4">
           <ExpenseListTable
             expensesList={expensesList}
             refreshData={() => getBudgetList()}
           />
-
-          
         </div>
+      </div>
 
-        <div className="grid gap-5">
-          <h2 className="font-bold text-lg">Latest Budgets</h2>
+      {/* Right Column - Budget List */}
+      <div className="bg-white rounded-xl shadow-sm p-4">
+        <h2 className="font-bold text-lg mb-4 text-gray-800">Latest Budgets</h2>
+        <div className="space-y-4">
           {budgetList?.length > 0
             ? budgetList.map((budget, index) => (
                 <BudgetItem budget={budget} key={index} />
@@ -120,13 +133,14 @@ function Dashboard() {
             : [1, 2, 3, 4, 5, 6, 7].map((item, index) => (
                 <div
                   key={index}
-                  className="h-[180px] w-full bg-slate-200 rounded-lg animate-pulse"
+                  className="h-24 w-full bg-gray-100 rounded-lg animate-pulse"
                 ></div>
               ))}
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 }
 
 export default Dashboard;
