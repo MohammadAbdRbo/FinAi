@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useUser, UserButton } from "@clerk/nextjs";
-import Footer from "./Footer"; // Import the Footer component
+
 
 const features = [
   {
@@ -96,8 +96,12 @@ export default function FinanceLanding() {
         <div className="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
           <div className="font-bold text-2xl bg-gradient-to-r from-blue-400 to-cyan-300 text-transparent bg-clip-text">FinAI</div>
           <ul className="hidden md:flex space-x-8">
-            <li className="hover:text-cyan-300 transition-colors cursor-pointer">Features</li>
-            <li className="hover:text-cyan-300 transition-colors cursor-pointer">Pricing</li>
+             <li>
+              <a href="#Features" className="hover:text-cyan-300 transition-colors cursor-pointer">
+                Features
+              </a>
+            </li>
+            
             <li className="hover:text-cyan-300 transition-colors cursor-pointer">About</li>
           </ul>
           {isSignedIn ? (
@@ -294,7 +298,7 @@ export default function FinanceLanding() {
             ) : (
               <Link href="/sign-up">
                 <button className="bg-white text-blue-900 px-8 py-4 rounded-full font-semibold hover:shadow-xl transition duration-300">
-                  Get Started — Free for 14 Days
+                  Get Started
                 </button>
               </Link>
             )}
@@ -302,8 +306,7 @@ export default function FinanceLanding() {
         </div>
       </section>
 
-      {/* Footer - Now using the separate component */}
-      <Footer />
+      
     </main>
   );
 }
