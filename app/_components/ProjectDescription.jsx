@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useUser, UserButton } from "@clerk/nextjs";
+import Footer from "./Footer"; // Import the Footer component
 
 const features = [
   {
@@ -136,7 +137,7 @@ export default function FinanceLanding() {
             ) : (
               <Link href="/sign-up">
                 <button className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold py-4 px-8 rounded-full shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition duration-300 w-full sm:w-auto">
-                  Start Free Trial
+                  Start Trial
                 </button>
               </Link>
             )}
@@ -301,25 +302,8 @@ export default function FinanceLanding() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="relative z-10 border-t border-slate-800 bg-slate-900/80 backdrop-blur-sm py-12">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="font-bold text-2xl bg-gradient-to-r from-blue-400 to-cyan-300 text-transparent bg-clip-text mb-6 md:mb-0">
-              FinAI
-            </div>
-            <div className="flex space-x-6 text-slate-400">
-              <a href="#" className="hover:text-white transition-colors">Features</a>
-              <a href="#" className="hover:text-white transition-colors">Pricing</a>
-              <a href="#" className="hover:text-white transition-colors">About</a>
-              <a href="#" className="hover:text-white transition-colors">Support</a>
-            </div>
-          </div>
-          <div className="mt-8 pt-8 border-t border-slate-800 text-center text-slate-500 text-sm">
-            © {new Date().getFullYear()} FinAI. All rights reserved.
-          </div>
-        </div>
-      </footer>
+      {/* Footer - Now using the separate component */}
+      <Footer />
     </main>
   );
 }
