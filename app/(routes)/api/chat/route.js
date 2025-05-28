@@ -1,6 +1,6 @@
 import { OpenAI } from "openai";
-import { db } from "@/utils/dbConfig"; // المسار حسب تنظيم مشروعك
-import { Budgets, Incomes, Expenses, Debts, Investments } from "@/utils/schema"; // تأكد من المسارات
+import { db } from "@/utils/dbConfig"; 
+import { Budgets, Incomes, Expenses, Debts, Investments } from "@/utils/schema"; 
 
 import { eq } from "drizzle-orm";
 
@@ -16,7 +16,7 @@ export async function POST(req) {
       return new Response(JSON.stringify({ advice: "User email is missing." }), { status: 400 });
     }
 
-    // 🧠 استرجاع بيانات المستخدم من القاعدة
+    
     const [budgets, incomes, expenses, debts, investments] = await Promise.all([
       db.select().from(Budgets).where(eq(Budgets.createdBy, userEmail)),
       db.select().from(Incomes).where(eq(Incomes.createdBy, userEmail)),
@@ -25,13 +25,13 @@ export async function POST(req) {
       db.select().from(Investments).where(eq(Investments.userEmail, userEmail)),
     ]);
 
-    // 🔍 تحديد اللغة
+    
     const msgLower = message.toLowerCase();
     let lang = "English";
     if (msgLower.includes("عربي") || msgLower.includes("العربية")) lang = "Arabic";
     else if (msgLower.includes("עברית") || msgLower.includes("עיברית") || msgLower.includes("بالعبرية")) lang = "Hebrew";
 
-    // 💬 بناء البرومبت
+    
     const systemPrompt = `
 You are a helpful financial assistant. You must respond ONLY in ${lang}.
 If the user asks something unrelated to personal finance, redirect them back.
@@ -51,7 +51,7 @@ Investments: ${investments.length > 0 ? JSON.stringify(investments) : "No invest
 Use this information to give personalized financial advice.
 `;
 
-    // 🔥 إرسال الطلب إلى OpenAI
+    
     const completion = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [

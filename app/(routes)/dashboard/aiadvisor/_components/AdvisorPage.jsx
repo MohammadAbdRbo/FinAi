@@ -38,7 +38,7 @@ function AdvisorPage({ totalBudget, totalIncome, totalSpend }) {
       setMessages((prevMessages) => [
         ...prevMessages,
         {
-          text: "حدث خطأ أثناء إرسال الرسالة. حاول مرة أخرى.",
+          text: "An error occurred while sending the message. Please try again.",
           sender: "bot",
         },
       ]);

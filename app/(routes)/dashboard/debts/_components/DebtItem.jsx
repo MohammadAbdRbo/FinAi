@@ -5,7 +5,7 @@ export default function DebtItem({ debt, onEdit, onDelete, onTogglePaid }) {
   return (
     <tr className="border-t">
       <td className="py-3 px-4 text-center">{debt.name}</td>
-      <td className="py-3 px-4 text-center">${debt.amount}</td>
+      <td className="py-3 px-4 text-center">₪{debt.amount}</td>
       <td className="py-3 px-4 text-center">
         {debt.dueDate ? new Date(debt.dueDate).toLocaleDateString() : '—'}
       </td>

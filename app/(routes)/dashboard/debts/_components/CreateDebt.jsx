@@ -34,7 +34,7 @@ export default function CreateDebt({ formData, onChange, onSubmit, onClose, edit
           </div>
 
           <div className="space-y-2">
-            <p className="text-sm font-medium">Amount ($)</p>
+            <p className="text-sm font-medium">Amount (₪)</p>
             <Input 
               id="amount"
               name="amount" 
